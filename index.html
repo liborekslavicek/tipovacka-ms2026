@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tipovačka MS2026</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body { font-family: Arial; margin:0; background:#f5f5f5; }
+.container { max-width:1200px; margin:auto; padding:20px; }
+
+h1 { text-align:center; }
+
+.menu { text-align:center; margin-bottom:20px; }
+.menu button {
+  margin:5px; padding:10px 15px;
+  border:none; cursor:pointer;
+  background:#333; color:white;
+  border-radius:6px;
+}
+.menu button:hover { background:#555; }
+.active { background:#1976d2 !important; }
+
+.box {
+  background:white;
+  padding:20px;
+  border-radius:10px;
+}
+
+table {
+  width:100%;
+  border-collapse:collapse;
+  background:white;
+}
+
+th, td {
+  border:1px solid #ddd;
+  padding:6px;
+  text-align:center;
+}
+
+.header-row td {
+  font-weight:bold;
+  background:#eee;
+}
+
+.gold { background: gold; }
+.silver { background: silver; }
+.bronze { background:#cd7f32; color:white; }
+
+.yes { color:green; font-weight:bold; }
+.no { color:red; }
+.row-yes { background:#e8f5e9; }
+
+.check { color:green; }
+.cross { color:red; }
+
+.deadline { font-size:22px; font-weight:bold; color:#d32f2f; }
+.countdown { margin-top:5px; font-size:18px; }
+
+input { padding:8px; margin-bottom:10px; width:300px; }
+
+.button {
+  display:inline-block;
+  margin-top:15px;
+  padding:10px 15px;
+  background:#1976d2;
+  color:white;
+  text-decoration:none;
+  border-radius:6px;
+}
+
+.closed {
+  color:#c62828;
+  font-weight:bold;
+}
+
+.section-title {
+  margin-top:25px;
+  font-weight:bold;
+  font-size:18px;
+}
+
+.payment-box{
+  margin-top:20px;
+  padding:15px;
+  background:#f0f7ff;
+  border-radius:10px;
+  text-align:center;
+}
+
+.payment-box img{
+  max-width:240px;
+  margin-top:10px;
+  border-radius:8px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🏆 Tipovačka fotbalového MS 2026</h1>
+
+<div class="menu">
+  <button onclick="load('uvod', this)">ÚVOD</button>
+  <button onclick="load('hraci', this)">HRÁČI</button>
+  <button onclick="load('poradi', this)">POŘADÍ</button>
+  <button onclick="load('zapasy', this)">ZÁPASY</button>
+  <button onclick="load('playoff', this)">PLAY OFF</button>
+  <button onclick="load('tipy', this)">TIPY</button>
+  <button onclick="load('tipyko', this)">TIPY KO</button>
+</div>
+
+<div id="content" class="box"></div>
+
+</div>
+
+<script>
+const API_KEY = "MS2026_SECRET";
+const API = "https://script.google.com/macros/s/AKfycbzuD1tfD3FaxHicUln2iOQbWGAf1xldQAyzECUEVLS4y_8McAI2FetzaciQZBY01b5w/exec";
+
+let currentTab = "uvod";
+let deadlineGlobal = null;
+
+function setActive(btn){
+  document.querySelectorAll(".menu button").forEach(b=>b.classList.remove("active"));
+  if(btn) btn.classList.add("active");
+}
+
+function formatCZ(date){
+  return date.toLocaleDateString("cs-CZ") + " " +
+         date.toLocaleTimeString("cs-CZ",{hour:"2-digit",minute:"2-digit"});
+}
+
+// ===== COUNTDOWN =====
+function startCountdown(el){
+  function update(){
+    const now = new Date();
+    const diff = deadlineGlobal - now;
+
+    if(diff <= 0){
+      el.innerHTML = "🔒 Tipy jsou uzavřené";
+
+      if(currentTab==="tipy" || currentTab==="tipyko"){
+        load(currentTab);
+      }
+      return;
+    }
+
+    const h = Math.floor(diff/1000/60/60);
+    const m = Math.floor(diff/1000/60)%60;
+    const s = Math.floor(diff/1000)%60;
+
+    el.innerHTML = `⏳ ${h}h ${m}m ${s}s`;
+  }
+
+  update();
+  setInterval(update,1000);
+}
+
+// ===== ÚVOD (HLAVNÍ ÚPRAVA) =====
+async function loadUvod(){
+
+  const res = await fetch(API + "?action=deadline&key=" + API_KEY);
+  const raw = await res.json();
+
+  const d = new Date(raw);
+  deadlineGlobal = d;
+
+  const now = new Date();
+
+  let statusText = "";
+  let button = "";
+
+  if(now < d){
+  statusText = "🔓 Tipy jsou nyní otevřené";
+
+  button = `
+  <a class="button" href="https://forms.gle/e9q15SnWNMuNCbRq7" target="_blank">
+    👉 Odeslat tip
+  </a>
+
+  <div class="payment-box">
+    <strong>💰 Platba startovného (100 Kč)</strong><br>
+    <small>Do poznámky uveď své jméno</small><br>
+
+    <img src="qr.png" alt="QR platba">
+  </div>
+`;
+} else {
+    statusText = '<span class="closed">🔒 Tipy jsou uzavřené</span>';
+  }
+
+  document.getElementById("content").innerHTML = `
+    <h2>📋 Informace o tipovačce</h2>
+
+    <p>Vítejte u pravidelné tipovačky k fotbalovému šampionátu. Opět tipujeme přesné výsledky a umístění týmů ve vyřazovací části. Nově budou výsledky vizualizovány na tomto webu a stejně tak i z tohoto webu lze vkládat tipy prostřednictvím formuláře.</p>
+
+    <ol>
+      <li>Po vyplnění tipu obdržíš své tipy na uvedený e-mail</li>
+      <li>Automaticky se nově tipující zobrazí v záložce hráči, po kontrole přijetí platby se objeví u hráče status zaplaceno</li>
+      <li>Startovné činí 100 Kč</li>
+      <li>Po odehrání jednotlivých zápasů a vložení výsledku, se bude aktualizovat průběžné pořadí hráčů</li>
+      <li>Tipy všech hráčů se zpřístupní se startem úvodního zápasu turnaje</li>
+      <li>Veškeré vklady budou rozděleny mezi TOP 5 hráčů</li>
+    </ol>
+
+    <div class="section-title">SYSTÉM BODOVÁNÍ</div>
+    <table>
+      <tr class="header-row"><td>Fáze</td><td>Typ tipu</td><td>Body</td></tr>
+      <tr><td>Skupiny</td><td>Správný tip na přesný výsledek</td><td>5</td></tr>
+      <tr><td>Skupiny</td><td>Správný tip na výsledek (výhra nebo remíza) a správný golový rozdíl v zápase</td><td>3</td></tr>
+      <tr><td>Skupiny</td><td>Správný tip na výsledek (výhra) a správný počet gólů jednoho týmu</td><td>2</td></tr>
+      <tr><td>Skupiny</td><td>Správný tip na výsledek (výhra)</td><td>1</td></tr>
+      <tr><td>Play off</td><td>Postup ze skupiny</td><td>2</td></tr>
+      <tr><td>Play off</td><td>Fáze 1/16 (skončí na 17. - 32. místě)</td><td>4</td></tr>
+      <tr><td>Play off</td><td>Fáze 1/8 (skončí na 9. - 16. místě)</td><td>7</td></tr>
+      <tr><td>Play off</td><td>Fáze 1/4 (skončí na 5. - 8. místě)</td><td>10</td></tr>
+      <tr><td>Play off</td><td>4. místo</td><td>15</td></tr>
+      <tr><td>Play off</td><td>3. místo</td><td>20</td></tr>
+      <tr><td>Play off</td><td>2. místo</td><td>25</td></tr>
+      <tr><td>Play off</td><td>1. místo</td><td>30</td></tr>
+    </table>
+
+    <div class="section-title">ROZDĚLENÍ VÝHER</div>
+    <table>
+      <tr class="header-row"><td>Pořadí</td><td>Podíl</td></tr>
+      <tr><td>1</td><td>45%</td></tr>
+      <tr><td>2</td><td>25%</td></tr>
+      <tr><td>3</td><td>15%</td></tr>
+      <tr><td>4</td><td>10%</td></tr>
+      <tr><td>5</td><td>5%</td></tr>
+    </table>
+
+<p>V případě rovnosti celkového počtu bodů, rozhodují o konečném pořadí tyto pravidla:</p>
+
+    <ol>
+      <li>Celkový počet bodů</li>
+      <li>V případě rovnosti vyšší počet přesných výsledků</li>
+      <li>V případě rovnosti vyšší počet postupujících ze skupiny</li>
+      <li>V případě rovnosti správný tip na vítěze turnaje</li>
+      <li>V případě rovnosti všech ukazatelů se výhra dělí poměrem - např. 15% + 10% / 2 = 12,5% </li>      
+    </ol>
+
+
+    <div class="section-title">DEADLINE pro zaslání tipů</div>
+
+    <p class="deadline">${formatCZ(d)}</p>
+    <div id="countdown" class="countdown"></div>
+    <p>${statusText}</p>
+    ${button}
+  `;
+
+  startCountdown(document.getElementById("countdown"));
+}
+
+// ===== LOAD (beze změny) =====
+async function load(type, btn=null){
+
+  currentTab = type;
+  setActive(btn);
+
+  if(type==="uvod"){
+    loadUvod();
+    return;
+  }
+
+  const res = await fetch(API + "?action=" + type + "&key=" + API_KEY);
+  let data = await res.json();
+
+  if(data.hidden){
+
+    const resD = await fetch(API + "?action=deadline&key=" + API_KEY);
+    const raw = await resD.json();
+    const d = new Date(raw);
+    deadlineGlobal = d;
+
+    document.getElementById("content").innerHTML = `
+      <h2>🔒 Tipy budou zobrazeny po uzávěrce</h2>
+      <p class="deadline">${formatCZ(d)}</p>
+      <div id="countdown" class="countdown"></div>
+    `;
+
+    startCountdown(document.getElementById("countdown"));
+    return;
+  }
+
+  let html = "";
+
+  if(type==="tipy" || type==="tipyko"){
+    html += `<input id="filterInput" placeholder="🔍 Hledat..." onkeyup="filterTable()">`;
+  }
+
+  html += "<table id='dataTable'>";
+
+  let labels = [];
+  let values = [];
+
+  data.forEach((row,i)=>{
+
+    if(type==="zapasy"){
+      row = row.filter((_,index)=>index!==1);
+    }
+
+    if(type==="playoff"){
+      if(i===0){
+        row[2] = "Postup";
+      }else{
+        if(row[2]===true){
+          row[2] = '<span class="yes">ANO</span>';
+          row._highlight=true;
+        }else{
+          row[2] = '<span class="no">NE</span>';
+        }
+      }
+    }
+
+    if(type==="hraci" && i>0){
+      row[2] = (row[2]==="ANO") ? '<span class="check">✔</span>' : '<span class="cross">✖</span>';
+      row[3] = row[3] + " Kč";
+    }
+
+    if(type==="poradi" && i>0){
+      row[8]=(row[8]*100).toFixed(2).replace(".",",")+" %";
+      row[9]=row[9].toLocaleString("cs-CZ")+" Kč";
+
+      labels.push(row[1]);
+      values.push(row[2]);
+    }
+
+    let cls="";
+    if(type==="poradi" && i===1){ cls="gold"; row[0]="🥇"; }
+    if(type==="poradi" && i===2){ cls="silver"; row[0]="🥈"; }
+    if(type==="poradi" && i===3){ cls="bronze"; row[0]="🥉"; }
+
+    if(type==="playoff" && row._highlight) cls="row-yes";
+    if(i===0) cls="header-row";
+
+    html += `<tr class="${cls}">`;
+
+    row.forEach((cell,colIndex)=>{
+      if(type==="poradi" && colIndex===2 && i>0){
+        html += `<td><strong>${cell}</strong></td>`;
+      } else {
+        html += `<td>${cell ?? ""}</td>`;
+      }
+    });
+
+    html += "</tr>";
+  });
+
+  html += "</table>";
+
+  if(type==="poradi"){
+    html += `<canvas id="chart"></canvas>`;
+  }
+
+  document.getElementById("content").innerHTML = html;
+
+  if(type==="poradi"){
+    new Chart(document.getElementById("chart"),{
+      type:"bar",
+      data:{
+        labels:labels,
+        datasets:[{
+          label:"Body",
+          data:values
+        }]
+      }
+    });
+  }
+}
+
+// ===== FILTER =====
+function filterTable(){
+  const input = document.getElementById("filterInput").value.toLowerCase();
+  const rows = document.querySelectorAll("#dataTable tr");
+
+  rows.forEach((row,i)=>{
+    if(i===0) return;
+    row.style.display = row.innerText.toLowerCase().includes(input) ? "" : "none";
+  });
+}
+
+// ===== START =====
+load("uvod");
+
+setInterval(()=>{
+  load(currentTab);
+},30000);
+</script>
+
+</body>
+</html>
