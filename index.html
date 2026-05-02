@@ -152,6 +152,9 @@ const API = "https://script.google.com/macros/s/AKfycbzuD1tfD3FaxHicUln2iOQbWGAf
 let currentTab = "uvod";
 let deadlineGlobal = null;
 
+/* 🔧 FIX – zabrání souběžnému načítání */
+let isLoading = false;
+
 function setActive(btn){
   document.querySelectorAll(".menu button").forEach(b=>b.classList.remove("active"));
   if(btn) btn.classList.add("active");
@@ -304,11 +307,15 @@ async function loadUvod(){
 // ===== LOAD =====
 async function load(type, btn=null){
 
+  if(isLoading && type === currentTab) return;
+  isLoading = true;
+
   currentTab = type;
   setActive(btn);
 
   if(type==="uvod"){
     loadUvod();
+    isLoading = false;
     return;
   }
 
@@ -329,6 +336,7 @@ async function load(type, btn=null){
     `;
 
     startCountdown(document.getElementById("countdown"));
+    isLoading = false;
     return;
   }
 
@@ -416,6 +424,8 @@ async function load(type, btn=null){
       }
     });
   }
+
+  isLoading = false;
 }
 
 // ===== FILTER =====
