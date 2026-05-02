@@ -97,6 +97,28 @@ input { padding:8px; margin-bottom:10px; width:300px; }
   border-radius:8px;
 }
 
+/* ✅ NOVÉ – pouze přidané */
+.stats-box {
+  display:flex;
+  justify-content:center;
+  gap:30px;
+  margin-bottom:20px;
+}
+.stat-card {
+  background:#1976d2;
+  color:white;
+  padding:15px 25px;
+  border-radius:10px;
+  text-align:center;
+  min-width:180px;
+}
+.stat-number {
+  font-size:28px;
+  font-weight:bold;
+}
+.stat-label {
+  font-size:14px;
+}
 </style>
 </head>
 
@@ -115,6 +137,9 @@ input { padding:8px; margin-bottom:10px; width:300px; }
   <button onclick="load('tipy', this)">TIPY</button>
   <button onclick="load('tipyko', this)">TIPY KO</button>
 </div>
+
+<!-- ✅ NOVÉ – pouze vložený box -->
+<div id="stats" class="stats-box"></div>
 
 <div id="content" class="box"></div>
 
@@ -135,6 +160,23 @@ function setActive(btn){
 function formatCZ(date){
   return date.toLocaleDateString("cs-CZ") + " " +
          date.toLocaleTimeString("cs-CZ",{hour:"2-digit",minute:"2-digit"});
+}
+
+/* ✅ NOVÉ – načtení statistik */
+async function loadStats(){
+  const res = await fetch(API + "?action=stats&key=" + API_KEY);
+  const data = await res.json();
+
+  document.getElementById("stats").innerHTML = `
+    <div class="stat-card">
+      <div class="stat-number">${data.hraci}</div>
+      <div class="stat-label">Počet hráčů</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">${data.bank.toLocaleString("cs-CZ")} Kč</div>
+      <div class="stat-label">Aktuální bank</div>
+    </div>
+  `;
 }
 
 // ===== COUNTDOWN =====
@@ -163,7 +205,7 @@ function startCountdown(el){
   setInterval(update,1000);
 }
 
-// ===== ÚVOD (HLAVNÍ ÚPRAVA) =====
+// ===== ÚVOD (BEZE ZMĚNY) =====
 async function loadUvod(){
 
   const res = await fetch(API + "?action=deadline&key=" + API_KEY);
@@ -259,7 +301,7 @@ async function loadUvod(){
   startCountdown(document.getElementById("countdown"));
 }
 
-// ===== LOAD (beze změny) =====
+// ===== LOAD =====
 async function load(type, btn=null){
 
   currentTab = type;
@@ -389,9 +431,11 @@ function filterTable(){
 
 // ===== START =====
 load("uvod");
+loadStats();
 
 setInterval(()=>{
   load(currentTab);
+  loadStats();
 },30000);
 </script>
 
