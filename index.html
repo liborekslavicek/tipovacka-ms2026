@@ -130,6 +130,7 @@ input { padding:8px; margin-bottom:10px; width:300px; }
 
 <div class="menu">
   <button onclick="load('uvod', this)">ÚVOD</button>
+  <button onclick="load('rozpisko', this)">ROZPIS KO</button>  
   <button onclick="load('hraci', this)">HRÁČI</button>
   <button onclick="load('poradi', this)">POŘADÍ</button>
   <button onclick="load('zapasy', this)">ZÁPASY</button>
@@ -318,6 +319,17 @@ async function load(type, btn=null){
     isLoading = false;
     return;
   }
+
+if(type==="rozpisko"){
+  document.getElementById("content").innerHTML = `
+    <h2>📊 Rozpis play-off</h2>
+    <div style="text-align:center">
+      <img src="rozpis.png" style="max-width:100%; border-radius:10px;">
+    </div>
+  `;
+  isLoading = false;
+  return;
+}
 
   const res = await fetch(API + "?action=" + type + "&key=" + API_KEY);
   let data = await res.json();
