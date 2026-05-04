@@ -239,16 +239,24 @@ async function loadUvod(){
   </div>
 
 <div class="payment-box" style="margin-top:15px;">
-  <strong>📧 Kontakt</strong><br>
+  <strong>📧 Kontakt - pro dotaz nebo připomínku napiš e-mail</strong><br>
 
-  <div id="emailText" style="margin-top:8px; font-size:16px;">
-    V případě dotazů nebo připomínek napiš e-mail
-  </div>
+  <div style="margin-top:8px; font-size:16px;">
+  tipovacka.online@seznam.cz
+</div>
 
-  <button onclick="copyEmail()" style="margin-top:10px; padding:6px 12px; cursor:pointer;">
+<div style="margin-top:10px;">
+  <button onclick="copyEmail()" style="padding:6px 12px; cursor:pointer; margin-right:8px;">
     📋 Kopírovat e-mail
   </button>
+
+  <a href="mailto:tipovacka.online@seznam.cz?subject=Tipovačka MS 2026">
+    <button style="padding:6px 12px; cursor:pointer;">
+      ✉️ Odeslat e-mail
+    </button>
+  </a>
 </div>
+  
 `;
 } else {
     statusText = '<span class="closed">🔒 Tipy jsou uzavřené</span>';
@@ -464,7 +472,7 @@ function filterTable(){
 }
 
 function copyEmail(){
-  const email = document.getElementById("emailText").innerText;
+  const email = "tipovacka.online@seznam.cz";
   navigator.clipboard.writeText(email).then(()=>{
     alert("E-mail zkopírován 👍");
   });
