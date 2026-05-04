@@ -237,6 +237,18 @@ async function loadUvod(){
 
     <img src="qr.png" alt="QR platba">
   </div>
+
+<div class="payment-box" style="margin-top:15px;">
+  <strong>📧 Kontakt</strong><br>
+
+  <div id="emailText" style="margin-top:8px; font-size:16px;">
+    V případě dotazů nebo připomínek napiš e-mail
+  </div>
+
+  <button onclick="copyEmail()" style="margin-top:10px; padding:6px 12px; cursor:pointer;">
+    📋 Kopírovat e-mail
+  </button>
+</div>
 `;
 } else {
     statusText = '<span class="closed">🔒 Tipy jsou uzavřené</span>';
@@ -448,6 +460,13 @@ function filterTable(){
   rows.forEach((row,i)=>{
     if(i===0) return;
     row.style.display = row.innerText.toLowerCase().includes(input) ? "" : "none";
+  });
+}
+
+function copyEmail(){
+  const email = document.getElementById("emailText").innerText;
+  navigator.clipboard.writeText(email).then(()=>{
+    alert("E-mail zkopírován 👍");
   });
 }
 
