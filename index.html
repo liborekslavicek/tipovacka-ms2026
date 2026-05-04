@@ -38,6 +38,16 @@ img:hover {
   transform: scale(1.05);
 }
 
+/* ANIMACE TABULKY */
+.fade-in {
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity:0; transform:translateY(10px); }
+  to { opacity:1; transform:translateY(0); }
+}
+
 table {
   width:100%;
   border-collapse:collapse;
@@ -423,12 +433,16 @@ if(type==="rozpisko"){
     }
 
     if(type==="poradi" && i>0){
-      row[8]=(row[8]*100).toFixed(2).replace(".",",")+" %";
-      row[9]=row[9].toLocaleString("cs-CZ")+" Kč";
 
-      labels.push(row[1]);
-      values.push(row[2]);
-    }
+  // pouze TOP 10 do grafu
+  if(i <= 10){
+    labels.push(row[1]);
+    values.push(row[2]);
+  }
+
+  row[8]=(row[8]*100).toFixed(2).replace(".",",")+" %";
+  row[9]=row[9].toLocaleString("cs-CZ")+" Kč";
+}
 
     let cls="";
     if(type==="poradi" && i===1){ cls="gold"; row[0]="🥇"; }
@@ -457,19 +471,50 @@ if(type==="rozpisko"){
     html += `<canvas id="chart"></canvas>`;
   }
 
-  document.getElementById("content").innerHTML = html;
+  const content = document.getElementById("content");
+content.innerHTML = html;
+content.classList.remove("fade-in");
+void content.offsetWidth; // restart animace
+content.classList.add("fade-in");
 
   if(type==="poradi"){
-    new Chart(document.getElementById("chart"),{
-      type:"bar",
-      data:{
-        labels:labels,
-        datasets:[{
-          label:"Body",
-          data:values
-        }]
+    const ctx = document.getElementById("chart").getContext("2d");
+
+const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+gradient.addColorStop(0, "#1976d2");
+gradient.addColorStop(1, "#64b5f6");
+
+new Chart(ctx,{
+  type:"bar",
+  data:{
+    labels:labels,
+    datasets:[{
+      label:"Body",
+      data:values,
+      backgroundColor:gradient,
+      borderRadius:8
+    }]
+  },
+  options:{
+    responsive:true,
+    plugins:{
+      legend:{ display:false },
+      tooltip:{
+        callbacks:{
+          label: ctx => " " + ctx.raw + " bodů"
+        }
       }
-    });
+    },
+    scales:{
+      y:{
+        beginAtZero:true,
+        ticks:{
+          stepSize:5
+        }
+      }
+    }
+  }
+});
   }
 
   isLoading = false;
