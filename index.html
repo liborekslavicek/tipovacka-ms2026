@@ -290,6 +290,8 @@ async function loadUvod(){
     </button>
   </a>
 </div>
+
+<div id="visitStats" class="stats-box" style="margin-top:15px;"></div>
   
 `;
 } else {
@@ -358,6 +360,8 @@ async function loadUvod(){
   `;
 
   startCountdown(document.getElementById("countdown"));
+
+trackVisit();
 }
 
 // ===== LOAD =====
@@ -546,6 +550,43 @@ function copyEmail(){
   navigator.clipboard.writeText(email).then(()=>{
     alert("E-mail zkopírován 👍");
   });
+}
+
+function getVisitorId(){
+  let id = localStorage.getItem("visitor_id");
+  if(!id){
+    id = Math.random().toString(36).substring(2);
+    localStorage.setItem("visitor_id", id);
+  }
+  return id;
+}
+
+async function trackVisit(){
+
+  const firstVisit = !sessionStorage.getItem("visited");
+
+  const id = getVisitorId();
+
+  const res = await fetch(API + "?action=visit&id=" + id + "&first=" + firstVisit + "&key=" + API_KEY);
+  const data = await res.json();
+
+  const el = document.getElementById("visitStats");
+  if(!el) return;
+
+  el.innerHTML = `
+    <div class="stat-card">
+      <div class="stat-number">${data.today}</div>
+      <div class="stat-label">Dnes návštěv</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">${data.total}</div>
+      <div class="stat-label">Celkem návštěv</div>
+    </div>
+  `;
+
+  if(firstVisit){
+    sessionStorage.setItem("visited","1");
+  }
 }
 
 // ===== START =====
