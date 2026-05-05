@@ -574,15 +574,19 @@ async function trackVisit(){
   if(!el) return;
 
   el.innerHTML = `
-    <div class="stat-card">
-      <div class="stat-number">${data.today}</div>
-      <div class="stat-label">Dnes návštěv</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-number">${data.total}</div>
-      <div class="stat-label">Celkem návštěv</div>
-    </div>
-  `;
+  <div style="
+    text-align:center;
+    font-size:16px;
+    line-height:1.8;
+    background:#f5f7fb;
+    padding:10px;
+    border-radius:8px;
+    display:inline-block;
+  ">
+    👀 dnešní počet návštěvníků - <strong>${data.today}</strong> <br>
+    📊 celkový počet návštěvníků - <strong>${data.total}</strong> <br>
+     </div>
+`;
 
   if(firstVisit){
     sessionStorage.setItem("visited","1");
