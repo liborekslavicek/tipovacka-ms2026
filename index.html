@@ -19,8 +19,6 @@ gtag('config', 'G-5R2QPRPDGB');
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <style>
 body { font-family: Arial; margin:0; background:#f5f5f5; }
 .container { max-width:1200px; margin:auto; padding:20px; }
@@ -457,9 +455,7 @@ if(type==="rozpisko"){
 
   html += "<table id='dataTable'>";
 
-  let labels = [];
-  let values = [];
-
+  
   data.forEach((row,i)=>{
 
     if(type==="zapasy"){
@@ -486,12 +482,7 @@ if(type==="rozpisko"){
 
     if(type==="poradi" && i>0){
 
-  // pouze TOP 10 do grafu
-  if(i <= 10){
-    labels.push(row[1]);
-    values.push(row[2]);
-  }
-
+  
   row[8]=(row[8]*100).toFixed(2).replace(".",",")+" %";
   row[9]=row[9].toLocaleString("cs-CZ")+" Kč";
 }
@@ -519,56 +510,13 @@ if(type==="rozpisko"){
 
   html += "</table>";
 
-  if(type==="poradi"){
-    html += `<canvas id="chart"></canvas>`;
-  }
-
   const content = document.getElementById("content");
 content.innerHTML = html;
 content.classList.remove("fade-in");
 void content.offsetWidth; // restart animace
-content.classList.add("fade-in");
+// content.classList.add("fade-in");
 
-  if(type==="poradi"){
-    const ctx = document.getElementById("chart").getContext("2d");
-
-const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-gradient.addColorStop(0, "#1976d2");
-gradient.addColorStop(1, "#64b5f6");
-
-new Chart(ctx,{
-  type:"bar",
-  data:{
-    labels:labels,
-    datasets:[{
-      label:"Body",
-      data:values,
-      backgroundColor:gradient,
-      borderRadius:8
-    }]
-  },
-  options:{
-    responsive:true,
-    plugins:{
-      legend:{ display:false },
-      tooltip:{
-        callbacks:{
-          label: ctx => " " + ctx.raw + " bodů"
-        }
-      }
-    },
-    scales:{
-      y:{
-        beginAtZero:true,
-        ticks:{
-          stepSize:5
-        }
-      }
-    }
-  }
-});
-  }
-
+  
   isLoading = false;
 }
 
@@ -639,7 +587,6 @@ setInterval(()=>{
   loadStats();
 },30000);
 </script>
-
 
 </body>
 </html>
