@@ -6,7 +6,7 @@
 <title>Tipovačka MS2026</title>
 
 <!-- Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-5R2QPRPDBG"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-5R2QPRPDGB"></script>
 <script>
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
@@ -61,6 +61,11 @@ table {
   background:white;
 }
 
+table{
+  display:block;
+  overflow-x:auto;
+}
+  
 th, td {
   border:1px solid #ddd;
   padding:6px;
@@ -512,10 +517,6 @@ if(type==="rozpisko"){
 
   const content = document.getElementById("content");
 content.innerHTML = html;
-content.classList.remove("fade-in");
-void content.offsetWidth; // restart animace
-// content.classList.add("fade-in");
-
   
   isLoading = false;
 }
@@ -584,6 +585,10 @@ load("uvod");
 loadStats();
 
 setInterval(()=>{
+  if(currentTab !== "uvod"){
+    load(currentTab);
+  }
+
   loadStats();
 },30000);
 </script>
