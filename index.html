@@ -59,13 +59,16 @@ table {
   width:100%;
   border-collapse:collapse;
   background:white;
+  min-width:600px;
 }
 
-table{
-  display:block;
+.table-wrapper{
+  width:100%;
   overflow-x:auto;
+  display:flex;
+  justify-content:center;
 }
-  
+ 
 th, td {
   border:1px solid #ddd;
   padding:6px;
@@ -458,7 +461,7 @@ if(type==="rozpisko"){
     html += `<input id="filterInput" placeholder="🔍 Hledat..." onkeyup="filterTable()">`;
   }
 
-  html += "<table id='dataTable'>";
+  html += "<div class='table-wrapper'><table id='dataTable'>";
 
   
   data.forEach((row,i)=>{
@@ -513,7 +516,7 @@ if(type==="rozpisko"){
     html += "</tr>";
   });
 
-  html += "</table>";
+  html += "</table></div>";
 
   const content = document.getElementById("content");
 content.innerHTML = html;
