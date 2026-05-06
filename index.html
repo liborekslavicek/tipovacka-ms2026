@@ -480,9 +480,25 @@ if(type==="rozpisko"){
     }
 
     if(type==="hraci" && i>0){
-      row[2] = (row[2]==="ANO") ? '<span class="check">✔</span>' : '<span class="cross">✖</span>';
+
+  // přeskočí pomocné řádky
+  if(row.length < 4 || !row[0]){
+    
+  } else {
+
+    // zaplaceno
+    if(row[2]==="ANO"){
+      row[2] = '<span class="check">✔</span>';
+    } else if(row[2]==="NE"){
+      row[2] = '<span class="cross">✖</span>';
+    }
+
+    // částka
+    if(row[3] !== "" && row[3] !== undefined){
       row[3] = row[3] + " Kč";
     }
+  }
+}
 
     if(type==="poradi" && i>0){
 
@@ -502,7 +518,9 @@ if(type==="rozpisko"){
     if(type==="poradi" && i===3){ cls="bronze"; row[0]="🥉"; }
 
     if(type==="playoff" && row._highlight) cls="row-yes";
-    if(i===0) cls="header-row";
+    if(row[0] && row[0].includes("ZAPLACENO BEZ TIPU")){
+  cls = "bronze";
+}
 
     html += `<tr class="${cls}">`;
 
