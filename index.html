@@ -264,12 +264,21 @@ document.getElementById("tipsButton").innerHTML = `
   <div style="text-align:center; margin-bottom:20px;">
     <a href="https://docs.google.com/spreadsheets/d/1On-hcsRQhQZ87yHGwlm7U9AdVWXpZe7IcEXH32ApUXA/edit?usp=sharing"
        target="_blank"
-       class="big-button">
+       style="
+         display:inline-block;
+         padding:12px 28px;
+         font-size:20px;
+         font-weight:bold;
+         background:#1976d2;
+         color:white;
+         text-decoration:none;
+         border-radius:10px;
+         box-shadow:0 0 10px rgba(25,118,210,0.3);
+       ">
        📋 Zobrazit všechny tipy
     </a>
   </div>
-`;
-}
+`;}
 
 // ===== COUNTDOWN =====
 function startCountdown(el){
