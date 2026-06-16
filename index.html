@@ -218,6 +218,8 @@ input { padding:8px; margin-bottom:10px; width:300px; }
 <!-- ✅ NOVÉ – pouze vložený box -->
 <div id="stats" class="stats-box"></div>
 
+<div id="tipsButton"></div>
+
 <div id="content" class="box"></div>
 
 </div>
@@ -257,6 +259,16 @@ async function loadStats(){
       <div class="stat-label">Aktuální bank</div>
     </div>
   `;
+
+document.getElementById("tipsButton").innerHTML = `
+  <div style="text-align:center; margin-bottom:20px;">
+    <a href="https://docs.google.com/spreadsheets/d/1On-hcsRQhQZ87yHGwlm7U9AdVWXpZe7IcEXH32ApUXA/edit?usp=sharing"
+       target="_blank"
+       class="big-button">
+       📋 Zobrazit všechny tipy
+    </a>
+  </div>
+`;
 }
 
 // ===== COUNTDOWN =====
