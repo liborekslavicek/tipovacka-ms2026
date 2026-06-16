@@ -336,6 +336,7 @@ async function loadUvod(){
 </div>
 
 <div id="visitStats" class="stats-box" style="margin-top:15px;"></div>
+
   
 `;
 } else {
@@ -400,8 +401,22 @@ async function loadUvod(){
     <p class="deadline">${formatCZ(d)}</p>
     <div id="countdown" class="countdown"></div>
     <p>${statusText}</p>
-    ${button}
-  `;
+${button}
+
+<div style="
+  margin-top:20px;
+  text-align:center;
+">
+  <a class="big-button"
+     href="https://docs.google.com/spreadsheets/d/1On-hcsRQhQZ87yHGwlm7U9AdVWXpZe7IcEXH32ApUXA/edit?usp=sharing"
+     target="_blank">
+     📋 Zobrazit všechny tipy
+  </a>
+</div>
+
+<div id="visitStats" style="margin-top:20px;text-align:center;"></div>
+
+`;
 
   startCountdown(document.getElementById("countdown"));
 
@@ -411,117 +426,152 @@ trackVisit();
 // ===== LOAD =====
 async function load(type, btn=null){
 
-  if(isLoading && type === currentTab) return;
+  if(isLoading) return;
   isLoading = true;
 
-  currentTab = type;
-  setActive(btn);
+  try{
 
-  if(type==="uvod"){
-    loadUvod();
-    isLoading = false;
-    return;
-  }
+    currentTab = type;
+    setActive(btn);
 
-if(type==="rozpisko"){
-  document.getElementById("content").innerHTML = `
-    <h2>📊 Rozpis play-off</h2>
-    <div style="text-align:center">
-      <img src="rozpis.png" style="max-width:100%; border-radius:10px;">
-    </div>
-  `;
-  isLoading = false;
-  return;
-}
-
-  const res = await fetch(API + "?action=" + type + "&key=" + API_KEY);
-  let data = await res.json();
-
-  if(data.hidden){
-
-    const resD = await fetch(API + "?action=deadline&key=" + API_KEY);
-    const raw = await resD.json();
-    const d = new Date(raw);
-    deadlineGlobal = d;
-
-    document.getElementById("content").innerHTML = `
-      <h2>🔒 Tipy budou zobrazeny po uzávěrce</h2>
-      <p class="deadline">${formatCZ(d)}</p>
-      <div id="countdown" class="countdown"></div>
-    `;
-
-    startCountdown(document.getElementById("countdown"));
-    isLoading = false;
-    return;
-  }
-
-  let html = "";
-
-  if(type==="tipy" || type==="tipyko"){
-    html += `<input id="filterInput" placeholder="🔍 Hledat..." onkeyup="filterTable()">`;
-  }
-
-  html += "<div class='table-wrapper'><table id='dataTable'>";
-
-  
-  data.forEach((row,i)=>{
-
-    if(type==="zapasy"){
-      row = row.filter((_,index)=>index!==1);
+    if(type==="uvod"){
+      await loadUvod();
+      return;
     }
 
-    if(type==="playoff"){
-      if(i===0){
-        row[2] = "Postup";
-      }else{
-        if(row[2]===true){
-          row[2] = '<span class="yes">ANO</span>';
-          row._highlight=true;
+    if(type==="rozpisko"){
+      document.getElementById("content").innerHTML = `
+        <h2>📊 Rozpis play-off</h2>
+        <div style="text-align:center">
+          <img src="rozpis.png" style="max-width:100%; border-radius:10px;">
+        </div>
+      `;
+      return;
+    }
+
+    const res = await fetch(API + "?action=" + type + "&key=" + API_KEY);
+    const data = await res.json();
+
+    console.log(type,data);
+
+    if(data.hidden){
+
+      const resD = await fetch(API + "?action=deadline&key=" + API_KEY);
+      const raw = await resD.json();
+      const d = new Date(raw);
+
+      deadlineGlobal = d;
+
+      document.getElementById("content").innerHTML = `
+        <h2>🔒 Tipy budou zobrazeny po uzávěrce</h2>
+        <p class="deadline">${formatCZ(d)}</p>
+        <div id="countdown" class="countdown"></div>
+      `;
+
+      startCountdown(document.getElementById("countdown"));
+      return;
+    }
+
+    if(!Array.isArray(data)){
+      document.getElementById("content").innerHTML = `
+        <h2>❌ Chyba načítání dat</h2>
+        <pre>${JSON.stringify(data,null,2)}</pre>
+      `;
+      return;
+    }
+
+    let html = "";
+
+    if(type==="tipy" || type==="tipyko"){
+      html += `<input id="filterInput" placeholder="🔍 Hledat..." onkeyup="filterTable()">`;
+    }
+
+    html += "<div class='table-wrapper'><table id='dataTable'>";
+
+    data.forEach((row,i)=>{
+
+      if(type==="zapasy"){
+        row = row.filter((_,index)=>index!==1);
+      }
+
+      if(type==="playoff"){
+        if(i===0){
+          row[2] = "Postup";
         }else{
-          row[2] = '<span class="no">NE</span>';
+          row[2] = row[2] === true
+            ? '<span class="yes">ANO</span>'
+            : '<span class="no">NE</span>';
         }
       }
-    }
 
-    if(type==="hraci" && i>0){
-      row[2] = (row[2]==="ANO") ? '<span class="check">✔</span>' : '<span class="cross">✖</span>';
-      row[3] = row[3] + " Kč";
-    }
+      if(type==="hraci" && i>0){
+        row[2] = row[2]==="ANO"
+          ? '<span class="check">✔</span>'
+          : '<span class="cross">✖</span>';
 
-    if(type==="poradi" && i>0){
-
-  
-  row[8]=(row[8]*100).toFixed(2).replace(".",",")+" %";
-  row[9]=row[9].toLocaleString("cs-CZ")+" Kč";
-}
-
-    let cls="";
-    if(type==="poradi" && i===1){ cls="gold"; row[0]="🥇"; }
-    if(type==="poradi" && i===2){ cls="silver"; row[0]="🥈"; }
-    if(type==="poradi" && i===3){ cls="bronze"; row[0]="🥉"; }
-
-    if(type==="playoff" && row._highlight) cls="row-yes";
-    if(i===0) cls="header-row";
-
-    html += `<tr class="${cls}">`;
-
-    row.forEach((cell,colIndex)=>{
-      if(type==="poradi" && colIndex===2 && i>0){
-        html += `<td><strong>${cell}</strong></td>`;
-      } else {
-        html += `<td>${cell ?? ""}</td>`;
+        row[3] = row[3] + " Kč";
       }
+
+      if(type==="poradi" && i>0){
+
+        if(row[8] != null){
+          row[8] = (row[8]*100)
+            .toFixed(2)
+            .replace(".",",") + " %";
+        }
+
+        if(row[9] != null){
+          row[9] = Number(row[9])
+            .toLocaleString("cs-CZ") + " Kč";
+        }
+      }
+
+      let cls="";
+
+      if(type==="poradi" && i===1){
+        cls="gold";
+        row[0]="🥇";
+      }
+
+      if(type==="poradi" && i===2){
+        cls="silver";
+        row[0]="🥈";
+      }
+
+      if(type==="poradi" && i===3){
+        cls="bronze";
+        row[0]="🥉";
+      }
+
+      if(i===0){
+        cls="header-row";
+      }
+
+      html += `<tr class="${cls}">`;
+
+      row.forEach(cell=>{
+        html += `<td>${cell ?? ""}</td>`;
+      });
+
+      html += "</tr>";
     });
 
-    html += "</tr>";
-  });
+    html += "</table></div>";
 
-  html += "</table></div>";
+    document.getElementById("content").innerHTML = html;
 
-  const content = document.getElementById("content");
-content.innerHTML = html;
-  
-  isLoading = false;
+  }catch(err){
+
+    console.error(err);
+
+    document.getElementById("content").innerHTML = `
+      <h2>❌ JavaScript chyba</h2>
+      <pre>${err.message}</pre>
+    `;
+  }
+  finally{
+    isLoading = false;
+  }
 }
 
 // ===== FILTER =====
