@@ -189,6 +189,37 @@ input { padding:8px; margin-bottom:10px; width:300px; }
 .stat-label {
   font-size:14px;
 }
+
+.top10-ticker{
+  width:100%;
+  max-width:1120px;
+  margin:18px auto;
+  overflow:hidden;
+  background:#1976d2;
+  color:white;
+  border-radius:10px;
+  padding:12px 0;
+  box-shadow:0 2px 8px rgba(0,0,0,0.15);
+}
+
+.top10-track{
+  display:inline-block;
+  white-space:nowrap;
+  padding-left:100%;
+  font-size:22px;
+  font-weight:bold;
+  animation:scrollTop10 30s linear infinite;
+}
+
+@keyframes scrollTop10{
+  0%{
+    transform:translateX(0);
+  }
+  100%{
+    transform:translateX(-100%);
+  }
+}
+
 </style>
 </head>
 
@@ -218,10 +249,11 @@ input { padding:8px; margin-bottom:10px; width:300px; }
 <!-- ✅ NOVÉ – pouze vložený box -->
 <div id="stats" class="stats-box"></div>
 
+<div id="top10Ticker"></div>
+
 <div id="tipsButton"></div>
 
 <div id="content" class="box"></div>
-
 </div>
 
 <script>
@@ -279,6 +311,48 @@ document.getElementById("tipsButton").innerHTML = `
     </a>
   </div>
 `;}
+
+async function loadTop10(){
+
+  try{
+
+    const res = await fetch(API + "?action=poradi&key=" + API_KEY);
+    const data = await res.json();
+
+    if(!Array.isArray(data) || data.length < 2) return;
+
+    let text = "";
+
+    for(let i = 1; i < Math.min(11, data.length); i++){
+
+      const poradi = i;
+      const jmeno = data[i][1];
+      const body = data[i][2];
+
+      const medal =
+  poradi === 1 ? "🥇" :
+  poradi === 2 ? "🥈" :
+  poradi === 3 ? "🥉" :
+  "🏅 " + poradi + ".";
+
+      text += `
+        ${medal} ${jmeno} (${body} b)
+        &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+      `;
+    }
+
+    document.getElementById("top10Ticker").innerHTML = `
+      <div class="top10-ticker">
+        <div class="top10-track">
+          ${text}
+        </div>
+      </div>
+    `;
+
+  }catch(err){
+    console.error("TOP10:", err);
+  }
+}
 
 // ===== COUNTDOWN =====
 function startCountdown(el){
@@ -696,6 +770,7 @@ async function trackVisit(){
 // ===== START =====
 load("uvod");
 loadStats();
+loadTop10();
 
 console.log("INTERVAL START");
 
@@ -710,6 +785,7 @@ setInterval(()=>{
   }
 
   loadStats();
+  loadTop10();
 
 },30000);
 
