@@ -266,8 +266,8 @@ document.getElementById("tipsButton").innerHTML = `
        target="_blank"
        style="
          display:inline-block;
-         padding:12px 28px;
-         font-size:20px;
+         padding:10px 24px;
+         font-size:18px;
          font-weight:bold;
          background:#1976d2;
          color:white;
@@ -287,13 +287,10 @@ function startCountdown(el){
     const diff = deadlineGlobal - now;
 
     if(diff <= 0){
-      el.innerHTML = "🔒 Tipy jsou uzavřené";
 
-      if(currentTab==="tipy" || currentTab==="tipyko"){
-        load(currentTab);
-      }
-      return;
-    }
+  el.innerHTML = "🔒 Tipy jsou uzavřené";
+  return;
+}
 
     const h = Math.floor(diff/1000/60/60);
     const m = Math.floor(diff/1000/60)%60;
@@ -473,8 +470,7 @@ async function load(type, btn=null){
     const res = await fetch(API + "?action=" + type + "&key=" + API_KEY);
     const data = await res.json();
 
-    console.log(type,data);
-
+    
     if(data.hidden){
 
       const resD = await fetch(API + "?action=deadline&key=" + API_KEY);
@@ -504,8 +500,22 @@ async function load(type, btn=null){
     let html = "";
 
     if(type==="tipy" || type==="tipyko"){
-      html += `<input id="filterInput" placeholder="🔍 Hledat..." onkeyup="filterTable()">`;
-    }
+  html += `
+  <div style="text-align:center;margin-bottom:15px;">
+    <input
+      type="text"
+      id="filterInput"
+      autocomplete="off"
+      placeholder="🔍 Hledat hráče, tým..."
+      style="
+        width:350px;
+        max-width:90%;
+        padding:10px;
+        border:1px solid #ccc;
+        border-radius:8px;
+      ">
+  </div>`;
+}
 
     html += "<div class='table-wrapper'><table id='dataTable'>";
 
@@ -581,6 +591,17 @@ async function load(type, btn=null){
 
     document.getElementById("content").innerHTML = html;
 
+const filter = document.getElementById("filterInput");
+
+if(filter){
+
+  filter.focus();
+
+  filter.addEventListener("input", function(){
+    filterTable();
+  });
+
+}
   }catch(err){
 
     console.error(err);
@@ -597,12 +618,30 @@ async function load(type, btn=null){
 
 // ===== FILTER =====
 function filterTable(){
-  const input = document.getElementById("filterInput").value.toLowerCase();
-  const rows = document.querySelectorAll("#dataTable tr");
 
-  rows.forEach((row,i)=>{
-    if(i===0) return;
-    row.style.display = row.innerText.toLowerCase().includes(input) ? "" : "none";
+  const filter = document.getElementById("filterInput");
+
+  if(!filter) return;
+
+  const value = filter.value.toLowerCase();
+
+  const table = document.getElementById("dataTable");
+
+  if(!table) return;
+
+  const rows = table.querySelectorAll("tr");
+
+  rows.forEach((row,index)=>{
+
+    if(index === 0) return;
+
+    const text = row.textContent.toLowerCase();
+
+    row.style.display =
+      text.includes(value)
+      ? ""
+      : "none";
+
   });
 }
 
@@ -658,13 +697,22 @@ async function trackVisit(){
 load("uvod");
 loadStats();
 
+console.log("INTERVAL START");
+
 setInterval(()=>{
-  if(currentTab !== "uvod"){
+
+  if(
+    currentTab !== "uvod" &&
+    currentTab !== "tipy" &&
+    currentTab !== "tipyko"
+  ){
     load(currentTab);
   }
 
   loadStats();
+
 },30000);
+
 </script>
 
 </body>
