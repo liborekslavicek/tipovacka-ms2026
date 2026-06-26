@@ -306,6 +306,70 @@ input { padding:8px; margin-bottom:10px; width:300px; }
     font-weight:bold;
 }
 
+.profile-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:0;
+    margin-top:25px;
+    border:1px solid #e5e5e5;
+    border-radius:12px;
+    overflow:hidden;
+}
+
+.profile-item{
+    padding:35px 20px;
+    text-align:center;
+    background:#fff;
+    border-right:1px solid #ececec;
+    border-bottom:1px solid #ececec;
+}
+
+.profile-item:nth-child(4),
+.profile-item:nth-child(8){
+    border-right:none;
+}
+
+.profile-item:nth-child(n+5){
+    border-bottom:none;
+}
+
+.profile-icon{
+    font-size:42px;
+    margin-bottom:10px;
+}
+
+.profile-title{
+    color:#3d69d5;
+    font-size:18px;
+    font-weight:bold;
+    margin-bottom:18px;
+}
+
+.profile-value{
+    font-size:34px;
+    font-weight:bold;
+}
+
+@media(max-width:900px){
+
+.profile-grid{
+grid-template-columns:repeat(2,1fr);
+}
+
+.profile-item:nth-child(2),
+.profile-item:nth-child(4),
+.profile-item:nth-child(6),
+.profile-item:nth-child(8){
+border-right:none;
+}
+
+.profile-item:nth-child(5),
+.profile-item:nth-child(6){
+border-bottom:1px solid #ececec;
+}
+
+}
+
 </style>
 </head>
 
@@ -327,6 +391,7 @@ input { padding:8px; margin-bottom:10px; width:300px; }
   <button onclick="load('hraci', this)">HRÁČI</button>
   <button onclick="load('poradi', this)">POŘADÍ</button>
   <button onclick="load('statistiky', this)">STATISTIKY</button>
+  <button onclick="load('profily', this)">👤 PROFILY</button>
   <button onclick="load('zapasy', this)">ZÁPASY</button>
   <button onclick="load('playoff', this)">PLAY OFF</button>
   <button onclick="load('tipy', this)">TIPY</button>
@@ -348,6 +413,7 @@ const API_KEY = "MS2026_SECRET";
 const API = "https://script.google.com/macros/s/AKfycbzuD1tfD3FaxHicUln2iOQbWGAf1xldQAyzECUEVLS4y_8McAI2FetzaciQZBY01b5w/exec";
 
 let currentTab = "uvod";
+let currentPlayer = null;
 let deadlineGlobal = null;
 
 /* 🔧 FIX – zabrání souběžnému načítání */
@@ -661,6 +727,11 @@ if(type==="statistiky"){
   return;
 }
 
+if(type==="profily"){
+    await loadProfily();
+    return;
+}
+
     const res = await fetch(API + "?action=" + type + "&key=" + API_KEY);
     const data = await res.json();
 
@@ -960,6 +1031,157 @@ function showStat(start,title){
     document.getElementById("content").innerHTML=html;
 
 }
+
+async function loadProfily(){
+
+    const res = await fetch(API + "?action=profily&key=" + API_KEY);
+    const data = await res.json();
+
+    let html = `
+        <h2>👤 Profily hráčů</h2>
+
+        <div style="margin-bottom:20px;text-align:center;">
+            <input
+                id="profilFilter"
+                type="text"
+                placeholder="Hledat hráče..."
+                style="width:350px;padding:10px;">
+        </div>
+
+        <div id="profilList"></div>
+    `;
+
+    document.getElementById("content").innerHTML = html;
+
+    window.profilData = data;
+
+    renderProfily("");
+    
+    document
+        .getElementById("profilFilter")
+        .addEventListener("input", e=>{
+            renderProfily(e.target.value);
+        });
+
+}
+
+function renderProfily(filter){
+
+    filter = filter.toLowerCase();
+
+    let html="";
+
+    for(let i=1;i<window.profilData.length;i++){
+
+        const row = window.profilData[i];
+
+        const jmeno = row[0];
+
+        if(!jmeno) continue;
+
+        if(!jmeno.toLowerCase().includes(filter)) continue;
+
+        html += `
+            <div class="stat-panel"
+     style="cursor:pointer;margin-bottom:15px;"
+     onclick="showProfil(${i})">
+
+                <h3>${jmeno}</h3>
+
+                Celkem bodů:
+                <b>${row[2]}</b>
+
+            </div>
+        `;
+    }
+
+    document.getElementById("profilList").innerHTML = html;
+
+}
+
+function showProfil(index){
+
+    currentPlayer = index;    
+    
+    const r = window.profilData[index];
+
+    document.getElementById("content").innerHTML = `
+
+<div class="stat-panel">
+
+<h2 style="text-align:center;">
+👤 ${r[0]}
+</h2>
+
+<div class="profile-grid">
+
+<div class="profile-item">
+    <div class="profile-icon">🏆</div>
+    <div class="profile-title">Celkové pořadí</div>
+    <div class="profile-value">${r[1]}.</div>
+</div>
+
+<div class="profile-item">
+    <div class="profile-icon">⭐</div>
+    <div class="profile-title">Celkem bodů</div>
+    <div class="profile-value">${r[2]}</div>
+</div>
+
+<div class="profile-item">
+    <div class="profile-icon">⚽</div>
+    <div class="profile-title">Body za skupiny</div>
+    <div class="profile-value">${r[3]}</div>
+</div>
+
+<div class="profile-item">
+    <div class="profile-icon">🏆</div>
+    <div class="profile-title">Body za play off</div>
+    <div class="profile-value">${r[4]}</div>
+</div>
+
+<div class="profile-item">
+    <div class="profile-icon">🎯</div>
+    <div class="profile-title">Přesné výsledky</div>
+    <div class="profile-value">${r[5]}</div>
+</div>
+
+<div class="profile-item">
+    <div class="profile-icon">✅</div>
+    <div class="profile-title">Postupující</div>
+    <div class="profile-value">${r[6]}</div>
+</div>
+
+<div class="profile-item">
+    <div class="profile-icon">🥇</div>
+    <div class="profile-title">Tip na mistra</div>
+    <div class="profile-value">${r[7]}</div>
+</div>
+
+<div class="profile-item">
+    <div class="profile-icon">💰</div>
+    <div class="profile-title">Průběžná výhra</div>
+    <div class="profile-value">${Number(r[9]).toLocaleString("cs-CZ")} Kč</div>
+</div>
+
+</div>
+
+<div style="text-align:center;margin-top:30px;">
+
+<button class="button"
+onclick="loadProfily()">
+
+← Zpět na hráče
+
+</button>
+
+</div>
+
+</div>
+
+`;
+
+}
+
 // ===== FILTER =====
 function filterTable(){
 
@@ -1051,7 +1273,11 @@ setInterval(()=>{
     currentTab !== "tipy" &&
     currentTab !== "tipyko"
   ){
+    if(currentTab==="profily" && currentPlayer!==null){
+    showProfil(currentPlayer);
+}else{
     load(currentTab);
+}
   }
 
   loadStats();
