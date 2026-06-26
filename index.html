@@ -533,11 +533,39 @@ async function load(type, btn=null){
 
     if(type==="rozpisko"){
       document.getElementById("content").innerHTML = `
-        <h2>📊 Rozpis play-off</h2>
-        <div style="text-align:center">
-          <img src="rozpis.png" style="max-width:100%; border-radius:10px;">
-        </div>
-      `;
+  <h2>📊 Rozpis play-off</h2>
+
+  <div style="text-align:center">
+
+    <a href="https://soccer2026.app/bracket"
+       target="_blank"
+       title="World Cup 2026 Bracket">
+
+      <img
+        src="https://soccer2026.app/images/bracket/world-cup-2026-bracket-en.png"
+        alt="World Cup 2026 Bracket"
+        style="
+          width:100%;
+          max-width:1100px;
+          border-radius:10px;
+          box-shadow:0 3px 10px rgba(0,0,0,.15);
+        ">
+
+    </a>
+
+    <div style="
+      font-size:12px;
+      color:#777;
+      margin-top:8px;">
+      Zdroj:
+      <a href="https://soccer2026.app/bracket"
+         target="_blank">
+         Bola 2026
+      </a>
+    </div>
+
+  </div>
+`;
       return;
     }
 
