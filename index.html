@@ -819,13 +819,14 @@ async function loadStatistiky(){
 
     const sekce = [
 
-        {nazev:"🎯 Přesné výsledky", start:0},
-        {nazev:"✅ Postupující ze skupin", start:4},
-        {nazev:"⚽ Body za skupiny", start:8},
-        {nazev:"🏆 Body za play off", start:12},
-        {nazev:"🥇 Správný tip na mistra světa", start:16}
+    {nazev:"🎯 Přesné výsledky", start:0},
+    {nazev:"✅ Postupující ze skupin", start:4},
+    {nazev:"⚽ Body za skupiny", start:8},
+    {nazev:"🏆 Body za play off", start:12},
+    {nazev:"🥇 Správný tip na mistra světa", start:16},
+    {nazev:"🏅 Celkové pořadí", start:20, poradi:true}
 
-    ];
+];
 
     let html='<div class="statistics-grid">';
 
@@ -872,7 +873,11 @@ html += "</table>";
         html+=`
             </table>
 
-            <button onclick="showStat(${s.start},'${s.nazev}')">
+            <button onclick="${
+    s.poradi
+      ? `load('poradi')`
+      : `showStat(${s.start},'${s.nazev}')`
+}">
                 Zobrazit celé pořadí
             </button>
 
