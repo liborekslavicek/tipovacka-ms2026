@@ -220,6 +220,92 @@ input { padding:8px; margin-bottom:10px; width:300px; }
   }
 }
 
+/* ===== STATISTIKY ===== */
+
+.statistics-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+    gap:20px;
+    margin-top:20px;
+}
+
+.stat-panel{
+    background:#fff;
+    border-radius:12px;
+    box-shadow:0 3px 10px rgba(0,0,0,.12);
+    padding:18px;
+    transition:.2s;
+}
+
+.stat-panel:hover{
+    transform:translateY(-3px);
+    box-shadow:0 6px 18px rgba(0,0,0,.18);
+}
+
+.stat-panel h3{
+    margin:0 0 15px;
+    text-align:center;
+    color:#1976d2;
+}
+
+.stat-panel table{
+    width:100%;
+    min-width:0 !important;
+    table-layout:fixed;
+    border-collapse:collapse;
+}
+
+.stat-panel td{
+    padding:8px;
+    border-bottom:1px solid #eee;
+}
+
+.stat-panel tr:nth-child(2){
+    background:#fff9c4;
+}
+
+.stat-panel tr:nth-child(3){
+    background:#eceff1;
+}
+
+.stat-panel tr:nth-child(4){
+    background:#ffe0b2;
+}
+
+.stat-panel button{
+    width:100%;
+    margin-top:12px;
+    padding:10px;
+    background:#1976d2;
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.stat-panel button:hover{
+    background:#1565c0;
+}
+
+.stat-panel td:nth-child(1){
+    width:40px;
+    text-align:center;
+}
+
+.stat-panel td:nth-child(2){
+    text-align:left;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+.stat-panel td:nth-child(3){
+    width:60px;
+    text-align:center;
+    font-weight:bold;
+}
+
 </style>
 </head>
 
@@ -240,6 +326,7 @@ input { padding:8px; margin-bottom:10px; width:300px; }
   <button onclick="load('rozpisko', this)">ROZPIS KO</button>  
   <button onclick="load('hraci', this)">HRÁČI</button>
   <button onclick="load('poradi', this)">POŘADÍ</button>
+  <button onclick="load('statistiky', this)">STATISTIKY</button>
   <button onclick="load('zapasy', this)">ZÁPASY</button>
   <button onclick="load('playoff', this)">PLAY OFF</button>
   <button onclick="load('tipy', this)">TIPY</button>
@@ -569,6 +656,11 @@ async function load(type, btn=null){
       return;
     }
 
+if(type==="statistiky"){
+  await loadStatistiky();
+  return;
+}
+
     const res = await fetch(API + "?action=" + type + "&key=" + API_KEY);
     const data = await res.json();
 
@@ -718,6 +810,139 @@ if(filter){
   }
 }
 
+// ===== STATISTIKY =====
+
+async function loadStatistiky(){
+
+    const res = await fetch(API + "?action=statistiky&key=" + API_KEY);
+    const data = await res.json();
+
+    const sekce = [
+
+        {nazev:"🎯 Přesné výsledky", start:0},
+        {nazev:"✅ Postupující ze skupin", start:4},
+        {nazev:"⚽ Body za skupiny", start:8},
+        {nazev:"🏆 Body za play off", start:12},
+        {nazev:"🥇 Správný tip na mistra světa", start:16}
+
+    ];
+
+    let html='<div class="statistics-grid">';
+
+    sekce.forEach(s=>{
+
+        html+=`
+        <div class="stat-panel">
+
+            <h3>${s.nazev}</h3>
+
+            <table>
+        `;
+
+        html += `
+<table class="stat-table">
+    <tr class="header-row">
+        <td style="width:55px;"><b>#</b></td>
+        <td style="text-align:left;"><b>Jméno</b></td>
+        <td style="width:70px;"><b>Body</b></td>
+    </tr>
+`;
+
+for(let i=2;i<=6;i++){
+
+    if(!data[i]) continue;
+
+    let cls="";
+
+    if(i===2) cls=' style="background:#fff9c4;"';       // zlato
+    if(i===3) cls=' style="background:#eceff1;"';       // stříbro
+    if(i===4) cls=' style="background:#ffe0b2;"';       // bronz
+
+    html+=`
+    <tr${cls}>
+        <td><b>${data[i][s.start]}</b></td>
+        <td style="text-align:left">${data[i][s.start+1]}</td>
+        <td><b>${data[i][s.start+2]}</b></td>
+    </tr>
+    `;
+}
+
+html += "</table>";
+
+        html+=`
+            </table>
+
+            <button onclick="showStat(${s.start},'${s.nazev}')">
+                Zobrazit celé pořadí
+            </button>
+
+        </div>
+        `;
+    });
+
+    html+="</div>";
+
+    document.getElementById("content").innerHTML=html;
+
+    window.statData=data;
+
+}
+
+function showStat(start,title){
+
+    let html=`
+        <h2>${title}</h2>
+
+        <div class="table-wrapper">
+        <table>
+
+        <tr class="header-row">
+            <td>Pořadí</td>
+            <td>Jméno</td>
+            <td>Počet</td>
+        </tr>
+    `;
+
+    for(let i=2;i<window.statData.length;i++){
+
+        if(!window.statData[i][start+1]) continue;
+
+        html+=`
+        <tr>
+
+            <td>${window.statData[i][start]}</td>
+
+            <td style="text-align:left">
+                ${window.statData[i][start+1]}
+            </td>
+
+            <td>
+                <b>${window.statData[i][start+2]}</b>
+            </td>
+
+        </tr>
+        `;
+    }
+
+    html+=`
+        </table>
+        </div>
+
+        <div style="text-align:center;margin-top:20px;">
+
+            <button class="button"
+                onclick="load('statistiky')">
+
+                ← Zpět
+
+            </button>
+
+        </div>
+    `;
+
+    document.getElementById("content").innerHTML=html;
+
+}
 // ===== FILTER =====
 function filterTable(){
 
