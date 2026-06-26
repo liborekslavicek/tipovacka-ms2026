@@ -1097,6 +1097,7 @@ async function loadProfily(){
 
     const res = await fetch(API + "?action=profily&key=" + API_KEY);
     const data = await res.json();
+    window.postupujiciCelkem = data[0][15];
 
     let html = `
         <h2>👤 Profily hráčů</h2>
@@ -1209,13 +1210,28 @@ function showProfil(index){
 <div class="profile-item">
     <div class="profile-icon">✅</div>
     <div class="profile-title">Postupující</div>
-    <div class="profile-value">${r[6]}</div>
+    <div class="profile-value">
+    ${r[6]} / ${window.postupujiciCelkem}
+</div>
 </div>
 
 <div class="profile-item">
     <div class="profile-icon">🥇</div>
     <div class="profile-title">Tip na mistra</div>
-    <div class="profile-value">${r[7]}</div>
+
+    <div class="profile-value"
+         style="
+            font-size:24px;
+            color:
+                ${r[17]=="1. místo"
+                    ? "#2e7d32"
+                    : r[17]=="Tým ve hře"
+                        ? "#000"
+                        : "#d32f2f"};
+         ">
+        ${r[16]}
+    </div>
+
 </div>
 
 <div class="profile-item">
