@@ -370,6 +370,38 @@ border-bottom:1px solid #ececec;
 
 }
 
+/* ===== NOVINKY ===== */
+
+.news-ticker{
+  width:100%;
+  max-width:1120px;
+  margin:12px auto 18px;
+  overflow:hidden;
+  background:#d32f2f;
+  color:#fff;
+  border-radius:10px;
+  padding:12px 0;
+  box-shadow:0 2px 8px rgba(0,0,0,.15);
+}
+
+.news-track{
+  display:inline-block;
+  white-space:nowrap;
+  padding-left:100%;
+  font-size:20px;
+  font-weight:bold;
+  animation:scrollNews 15s linear infinite;
+}
+
+@keyframes scrollNews{
+  from{
+    transform:translateX(0);
+  }
+  to{
+    transform:translateX(-100%);
+  }
+}
+
 </style>
 </head>
 
@@ -402,6 +434,8 @@ border-bottom:1px solid #ececec;
 <div id="stats" class="stats-box"></div>
 
 <div id="top10Ticker"></div>
+
+<div id="newsTicker"></div>
 
 <div id="tipsButton"></div>
 
@@ -505,6 +539,33 @@ async function loadTop10(){
   }catch(err){
     console.error("TOP10:", err);
   }
+}
+
+// ===== NOVINKY =====
+async function loadNews(){
+
+  try{
+
+    const res = await fetch(API + "?action=novinky&key=" + API_KEY);
+    const text = await res.json();
+
+    if(!text || text.trim()===""){
+      document.getElementById("newsTicker").innerHTML = "";
+      return;
+    }
+
+    document.getElementById("newsTicker").innerHTML = `
+      <div class="news-ticker">
+        <div class="news-track">
+          📢 ${text}
+        </div>
+      </div>
+    `;
+
+  }catch(err){
+    console.error("NOVINKY:", err);
+  }
+
 }
 
 // ===== COUNTDOWN =====
@@ -1263,6 +1324,7 @@ async function trackVisit(){
 load("uvod");
 loadStats();
 loadTop10();
+loadNews();
 
 console.log("INTERVAL START");
 
@@ -1282,6 +1344,7 @@ setInterval(()=>{
 
   loadStats();
   loadTop10();
+  loadNews();
 
 },30000);
 
