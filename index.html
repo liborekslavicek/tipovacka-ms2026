@@ -854,14 +854,26 @@ for(let i=2;i<=6;i++){
     if(!data[i]) continue;
 
     let cls="";
+    let poradi=data[i][s.start];
 
-    if(i===2) cls=' style="background:#fff9c4;"';       // zlato
-    if(i===3) cls=' style="background:#eceff1;"';       // stříbro
-    if(i===4) cls=' style="background:#ffe0b2;"';       // bronz
+    if(i===2){
+        cls=' style="background:#fff9c4;"';
+        poradi="🥇";
+    }
+
+    if(i===3){
+        cls=' style="background:#eceff1;"';
+        poradi="🥈";
+    }
+
+    if(i===4){
+        cls=' style="background:#ffe0b2;"';
+        poradi="🥉";
+    }
 
     html+=`
     <tr${cls}>
-        <td><b>${data[i][s.start]}</b></td>
+        <td style="text-align:center;font-size:20px;"><b>${poradi}</b></td>
         <td style="text-align:left">${data[i][s.start+1]}</td>
         <td><b>${data[i][s.start+2]}</b></td>
     </tr>
