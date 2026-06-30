@@ -450,6 +450,9 @@ let currentTab = "uvod";
 let currentPlayer = null;
 let deadlineGlobal = null;
 
+// ✅ otevřen detail statistik?
+let statisticsDetail = false;
+
 /* 🔧 FIX – zabrání souběžnému načítání */
 let isLoading = false;
 
@@ -946,6 +949,8 @@ if(filter){
 
 async function loadStatistiky(){
 
+    statisticsDetail = false;
+
     const res = await fetch(API + "?action=statistiky&key=" + API_KEY);
     const data = await res.json();
 
@@ -1050,6 +1055,8 @@ html += "</table>";
 }
 
 function showStat(start,title){
+
+    statisticsDetail = true;
 
     const jeTym = start >= 24;
 
@@ -1370,13 +1377,23 @@ setInterval(()=>{
     currentTab !== "uvod" &&
     currentTab !== "tipy" &&
     currentTab !== "tipyko"
-  ){
+){
+
     if(currentTab==="profily" && currentPlayer!==null){
-    showProfil(currentPlayer);
-}else{
-    load(currentTab);
+
+        showProfil(currentPlayer);
+
+    }else if(currentTab==="statistiky" && statisticsDetail){
+
+        // nech otevřený detail statistik
+
+    }else{
+
+        load(currentTab);
+
+    }
+
 }
-  }
 
   loadStats();
   loadTop10();
