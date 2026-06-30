@@ -951,12 +951,24 @@ async function loadStatistiky(){
 
     const sekce = [
 
+    // ===== Statistiky hráčů =====
     {nazev:"🎯 Přesné výsledky", start:0},
     {nazev:"✅ Postupující ze skupin", start:4},
     {nazev:"⚽ Body za skupiny", start:8},
     {nazev:"🏆 Body za play off", start:12},
     {nazev:"🥇 Správný tip na mistra světa", start:16},
-    {nazev:"🏅 Celkové pořadí", start:20, poradi:true}
+    {nazev:"🏅 Celkové pořadí", start:20, poradi:true},
+
+    // ===== Statistiky týmů =====
+    {nazev:"⭐ Nejčastěji tipovaný mistr světa", start:24},
+    {nazev:"✅ Nejčastěji tipované postupující týmy", start:28},
+    {nazev:"❌ Nejméně tipované postupující týmy", start:32},
+    {nazev:"💔 Nejvíce věřený tým, který nepostoupil", start:36},
+    {nazev:"😲 Největší překvapení", start:40},
+    {nazev:"😢 Největší zklamání", start:44},
+    {nazev:"👑 Nejčastější favorit na titul, který už vypadl", start:48},
+    {nazev:"🏆 Žebříček týmů podle bodů od tipujících", start:52},
+    {nazev:"🎯 Nejpřesněji tipované týmy", start:56}
 
 ];
 
@@ -1039,6 +1051,14 @@ html += "</table>";
 
 function showStat(start,title){
 
+    const jeTym = start >= 24;
+
+    const hlavicka =
+        jeTym ? "Tým" : "Jméno";
+
+    const hodnota =
+        jeTym ? "Počet" : "Body";
+
     let html=`
         <h2>${title}</h2>
 
@@ -1047,10 +1067,10 @@ function showStat(start,title){
 
         <tr class="header-row">
             <td>Pořadí</td>
-            <td>Jméno</td>
-            <td>Počet</td>
+            <td>${hlavicka}</td>
+            <td>${hodnota}</td>
         </tr>
-    `;
+`;
 
     for(let i=2;i<window.statData.length;i++){
 
